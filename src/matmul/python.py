@@ -10,7 +10,6 @@ def main():
     import sys
     import time
     import random
-    random.seed(0)
 
     n = int(sys.argv[1])
 
