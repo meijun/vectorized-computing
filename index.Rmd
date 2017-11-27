@@ -71,7 +71,7 @@ for k in range(n):
 ```{python eval=FALSE}
 for k in range(n):
   n_n = G[:, k].reshape(n, 1) + G[k, :].reshape(1, n)
-  G = np.min(G, n_n)
+  G = np.minimum(G, n_n)
 ```
 
 ```{python eval=FALSE}
