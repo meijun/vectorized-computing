@@ -1,2 +1,3 @@
-# vectorization-computing
-A talk about vectorization computing
+# Vectorized Computing
+
+A talk about vectorized computing.

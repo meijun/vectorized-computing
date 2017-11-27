@@ -1,0 +1,86 @@
+---
+title: "Vectorized Computing"
+author: "Jun Mei"
+date: "November 27, 2017"
+output: ioslides_presentation
+---
+
+## Matrix multiplication | $A=B \times C$
+
+```{python eval=FALSE}
+for i in range(m):
+  for j in range(n):
+    for k in range(r):
+      A[i][j] += B[i][k] * C[k][j]
+```
+
+## Matrix multiplication | Vectorized
+
+```{python eval=FALSE}
+for i in range(m):
+  for j in range(n):
+    A[i, j] = np.sum(B[i, :] * C[:, j])
+```
+
+```{python eval=FALSE}
+for i in range(m):
+  for j in range(n):
+    for k in range(r):
+      A[i][j] += B[i][k] * C[k][j]
+```
+
+## Matrix multiplication | Fully vectorized
+
+```{python eval=FALSE}
+m_r_n = B.reshape(m, r, 1) * C.reshape(1, r, n)
+A = np.sum(m_r_n, axis=1)
+```
+
+```{python eval=FALSE}
+for i in range(m):
+  for j in range(n):
+    for k in range(r):
+      A[i][j] += B[i][k] * C[k][j]
+```
+
+## Boardcasting
+
+```{python}
+import numpy as np
+B = np.array([[0, 1]])  # shape: 1x2
+C = np.array([[0],
+              [1],
+              [2]])  # shape: 3x1
+A = B + C
+print(A)
+```
+
+## Floyd-Warshall algorithm
+
+$G$ is an $n \times n$ adjacency matrix
+
+```{python eval=FALSE}
+for k in range(n):
+  for i in range(n):
+    for j in range(n):
+      G[i][j] = min(G[i][j], G[i][k] + G[k][j])
+```
+
+## Floyd-Warshall algorithm | Vectorized
+
+```{python eval=FALSE}
+for k in range(n):
+  n_n = G[:, k].reshape(n, 1) + G[k, :].reshape(1, n)
+  G = np.min(G, n_n)
+```
+
+```{python eval=FALSE}
+for k in range(n):
+  for i in range(n):
+    for j in range(n):
+      G[i][j] = min(G[i][j], G[i][k] + G[k][j])
+```
+
+## Thank you! {.flexbox .vcenter}
+
+Q&A
