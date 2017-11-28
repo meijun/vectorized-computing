@@ -108,7 +108,9 @@ lp <- function(df) {
 lp(f0)
 ```
 
-## for_*
+----
+
+for_python << for_go < for_java < for_c
 
 ```{r echo=FALSE}
 f1 <- f0[f0$Method %in% c("for_c", "for_go", "for_java", "for_python"),]
@@ -116,14 +118,18 @@ lp(f1)
 ```
 
 
-## k_* (cpu)
+----
+
+k_tf < k_torch < k_numpy < for_java < for_c (N <= 4)
 
 ```{r echo=FALSE}
 f1 <- f0[f0$Method %in% c("for_c", "for_java", "k_numpy", "k_torch", "k_tf"),]
 lp(f1)
 ```
 
-## k_* (cpu) (N >= 128)
+----
+
+k_numpy = k_tf = k_torch = for_java < for_c
 
 ```{r echo=FALSE}
 f1 <- f0[f0$Method %in% c("for_c", "for_java", "k_numpy", "k_torch", "k_tf"),]
@@ -131,7 +137,9 @@ f2 <- f1[f1$N >= 128,]
 lp(f2)
 ```
 
-## k_*_gpu
+----
+
+for_java < for_c < k_tf_gpu = k_torch_gpu
 
 ```{r echo=FALSE}
 f1 <- f0[f0$Method %in% c("for_c", "for_java", "k_torch_gpu", "k_tf_gpu"),]
@@ -144,42 +152,54 @@ lp(f1)
 lp(m0)
 ```
 
-## for_*
+----
+
+for_python << for_go < for_java <= for_c
 
 ```{r echo=FALSE}
 m1 <- m0[m0$Method %in% c("for_c", "for_go", "for_java", "for_python"),]
 lp(m1)
 ```
 
-## ij_*
+----
+
+ij_*_gpu < ij_tf < ij_numpy = ij_torch < for_+
 
 ```{r echo=FALSE}
 m1 <- m0[m0$Method %in% c("for_c", "for_java", "ij_numpy", "ij_tf", "ij_torch", "ij_tf_gpu", "ij_torch_gpu"),]
 lp(m1)
 ```
 
-## full_*
+----
+
+full_cpu < for_+ < full_tf_gpu < full_torch_gpu
 
 ```{r echo=FALSE, fig.height=5.5}
 m1 <- m0[m0$Method %in% c("for_c", "for_java", "full_numpy", "full_tf", "full_torch", "full_tf_gpu", "full_torch_gpu"),]
 lp(m1)
 ```
 
-## mat_* + full_*_gpu
+----
+
+for_+ < full_\*gpu < mat_\*
 
 ```{r echo=FALSE, fig.height=5.5}
 m1 <- m0[m0$Method %in% c("for_c", "for_java", "full_tf_gpu", "full_torch_gpu", "mat_numpy", "mat_tf", "mat_torch", "mat_tf_gpu", "mat_torch_gpu"),]
 lp(m1)
 ```
 
-## mat_*
+----
+
+tf_gpu < tf < torch_gpu < torch < numpy (N < 128)
 
 ```{r echo=FALSE, fig.height=5.5}
 m1 <- m0[m0$Method %in% c("mat_numpy", "mat_tf", "mat_torch", "mat_tf_gpu", "mat_torch_gpu"),]
 lp(m1)
 ```
 
-## mat_* (N >= 128)
+----
+
+tf < numpy < torch < tf_gpu < torch_gpu
 
 ```{r echo=FALSE, fig.height=5.5}
 m1 <- m0[m0$Method %in% c("mat_numpy", "mat_tf", "mat_torch", "mat_tf_gpu", "mat_torch_gpu"),]
@@ -189,9 +209,5 @@ lp(m2)
 
 ## Conclusion
 
-> - *\_gpu is significantly faster than for\_\*
-> - full_* is significantly faster than for_\*
-> - *_torch_gpu is sometimes faster than \*_tf_gpu (nerver worse)
-> - mat_* is significantly faster than full_\* (the only case cpu beat gpu)
 > - The code is avaiable
   - at https://github.com/meijun/vectorized-computing
