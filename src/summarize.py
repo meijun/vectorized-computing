@@ -57,7 +57,7 @@ def main():
         f.writelines('| :------: | %s |\n' % ' | '.join(':---:' for _ in range(n)))
         for name, times in res:
             f.writelines('| %s | %s |\n' % (name, ' | '.join(
-                str(times[i]) if i < len(times) else 'N/A' for i in range(n))))
+                '%.9f' % times[i] if i < len(times) else 'N/A' for i in range(n))))
     with open('summary.csv', 'w') as f:
         f.writelines('Method,N,Time\n')
         for name, times in res:
