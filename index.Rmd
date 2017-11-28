@@ -2,10 +2,12 @@
 title: "Vectorized Computing"
 author: "Jun Mei"
 date: "November 27, 2017"
-output: ioslides_presentation
+output: 
+  ioslides_presentation: 
+    transition: faster
 ---
 
-## Matrix multiplication | $A=B \times C$
+## Matrix multiplication | A = BxC
 
 ```{python eval=FALSE}
 for i in range(m):
@@ -57,7 +59,7 @@ print(A)
 
 ## Floyd-Warshall algorithm
 
-$G$ is an $n \times n$ adjacency matrix
+G is an nxn adjacency matrix
 
 ```{python eval=FALSE}
 for k in range(n):
@@ -81,6 +83,115 @@ for k in range(n):
       G[i][j] = min(G[i][j], G[i][k] + G[k][j])
 ```
 
-## Thank you! {.flexbox .vcenter}
+## Experiments
 
-Q&A
+- Warm-up-time limit: 1 minute
+- Cratical-time limit: 1 second
+
+```{r echo=FALSE}
+library(ggplot2)
+library(scales)
+f0 <- read.csv("src/floyd/summary.csv")
+m0 <- read.csv("src/matmul/summary.csv")
+lp <- function(df) {
+	ggplot(df, aes(x=N, y=Time, col=Method)) +
+		geom_line() +
+		geom_point() +
+		scale_x_continuous(trans=log2_trans()) +
+		scale_y_log10()
+}
+```
+
+## Floyd-Warshall algorithm
+
+```{r echo=FALSE}
+lp(f0)
+```
+
+## for_*
+
+```{r echo=FALSE}
+f1 <- f0[f0$Method %in% c("for_c", "for_go", "for_java", "for_python"),]
+lp(f1)
+```
+
+
+## k_* (cpu)
+
+```{r echo=FALSE}
+f1 <- f0[f0$Method %in% c("for_c", "for_java", "k_numpy", "k_torch", "k_tf"),]
+lp(f1)
+```
+
+## k_* (cpu) (N >= 128)
+
+```{r echo=FALSE}
+f1 <- f0[f0$Method %in% c("for_c", "for_java", "k_numpy", "k_torch", "k_tf"),]
+f2 <- f1[f1$N >= 128,]
+lp(f2)
+```
+
+## k_*_gpu
+
+```{r echo=FALSE}
+f1 <- f0[f0$Method %in% c("for_c", "for_java", "k_torch_gpu", "k_tf_gpu"),]
+lp(f1)
+```
+
+## Matrix multiplication
+
+```{r echo=FALSE, fig.height=5.5}
+lp(m0)
+```
+
+## for_*
+
+```{r echo=FALSE}
+m1 <- m0[m0$Method %in% c("for_c", "for_go", "for_java", "for_python"),]
+lp(m1)
+```
+
+## ij_*
+
+```{r echo=FALSE}
+m1 <- m0[m0$Method %in% c("for_c", "for_java", "ij_numpy", "ij_tf", "ij_torch", "ij_tf_gpu", "ij_torch_gpu"),]
+lp(m1)
+```
+
+## full_*
+
+```{r echo=FALSE, fig.height=5.5}
+m1 <- m0[m0$Method %in% c("for_c", "for_java", "full_numpy", "full_tf", "full_torch", "full_tf_gpu", "full_torch_gpu"),]
+lp(m1)
+```
+
+## mat_* + full_*_gpu
+
+```{r echo=FALSE, fig.height=5.5}
+m1 <- m0[m0$Method %in% c("for_c", "for_java", "full_tf_gpu", "full_torch_gpu", "mat_numpy", "mat_tf", "mat_torch", "mat_tf_gpu", "mat_torch_gpu"),]
+lp(m1)
+```
+
+## mat_*
+
+```{r echo=FALSE, fig.height=5.5}
+m1 <- m0[m0$Method %in% c("mat_numpy", "mat_tf", "mat_torch", "mat_tf_gpu", "mat_torch_gpu"),]
+lp(m1)
+```
+
+## mat_* (N >= 128)
+
+```{r echo=FALSE, fig.height=5.5}
+m1 <- m0[m0$Method %in% c("mat_numpy", "mat_tf", "mat_torch", "mat_tf_gpu", "mat_torch_gpu"),]
+m2 <- m1[m1$N >= 128,]
+lp(m2)
+```
+
+## Conclusion
+
+> - *\_gpu is significantly faster than for\_\*
+> - full_* is significantly faster than for_\*
+> - *_torch_gpu is sometimes faster than \*_tf_gpu (nerver worse)
+> - mat_* is significantly faster than full_\* (the only case cpu beat gpu)
+> - The code is avaiable
+  - at https://github.com/meijun/vectorized-computing
