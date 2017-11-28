@@ -1,4 +1,5 @@
 import os
+import time
 import argparse
 import subprocess
 import collections
@@ -14,7 +15,8 @@ langs = {
 
 ap = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 ap.add_argument('folder', help='to process')
-ap.add_argument('--max-time', default=1.0, help='in seconds, break if exceed')
+ap.add_argument('--critical', default=1.0, help='in seconds, break if exceed')
+ap.add_argument('--warm-up', default=60.0, help='in seconds, break if exceed')
 ap = ap.parse_args()
 
 
@@ -27,13 +29,17 @@ def one_file(name, ext):
     subprocess.check_output(lang.execute.format(**locals()).split())
     while True:
         try:
+            tic = time.time()
             t = subprocess.check_output(lang.execute.format(**locals()).split())
+            toc = time.time()
+            if toc - tic > ap.warm_up + ap.critical:
+                break
         except subprocess.CalledProcessError:
             break
         print('%s %d %s' % (name, n, t))
         t = float(t)
         times.append(t)
-        if t > ap.max_time:
+        if t > ap.critical:
             break
         n *= 2
     Res = collections.namedtuple('Res', 'name times')
