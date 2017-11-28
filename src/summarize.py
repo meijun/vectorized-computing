@@ -30,7 +30,7 @@ def one_file(name, ext):
             t = subprocess.check_output(lang.execute.format(**locals()).split())
         except subprocess.CalledProcessError:
             break
-        print('%d %s' % (n, t))
+        print('%s %d %s' % (name, n, t))
         t = float(t)
         times.append(t)
         if t > ap.max_time:
