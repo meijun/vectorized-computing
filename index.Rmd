@@ -1,11 +1,60 @@
 ---
 title: "Vectorized Computing"
 author: "Jun Mei"
-date: "November 27, 2017"
+date: "November 29, 2017"
 output: 
-  ioslides_presentation: 
+  ioslides_presentation:
     transition: faster
 ---
+
+## Contents
+
+- Why?
+- What & How?
+- Experiments on performance
+
+## MIMD or SIMD?
+
+|  Technique  |  Pursuing  |  Blocked by  |
+| :---------: | :--------: | :----------: |
+|    SISD     | Higher speed (GHz) | Physics |
+|    MIMD     | More CPU cores | Synchronization |
+|    SIMD     | More CUDA cores | Price :) |
+
+## CPU or GPU?
+
+|  Technique  |  Instruction  |  Vector length  |
+| :---------: | :-----------: | :-------------: |
+|   CPU SIMD  | SSE4.1 SSE4.2 AVX AVX2 FMA | Commonly <= 256 bit |
+|   GPU SIMD  | N/A, use CUDA | Thousands of Bytes |
+
+## Programming
+
+|  Technique  |  Hard mode  |  Easy mode  |
+| :---------: | :---------: | :---------: |
+|   CPU SIMD  | C/C++, assembly; instruction-orientated | NumPy |
+|   CPU MIMD  | Java, etc; dead lock, data race | Java actor, Go, Rust |
+|   GPU SIMD  | CUDA; register-orientated | ??? |
+
+## GPU SIMD easy mode? | Is there a GPU backend for Numpy? Money is no issue
+
+On [Reddit](https://www.reddit.com/r/Python/comments/1mw9mb/is_there_a_gpu_backend_for_numpyscipy_money_is_no/), four years ago.
+
+- PyCUDA and PyOpenCL: Register-orientated :(
+- NumbaPro: Register-orientated :(
+- Theano: Died now :(
+- gnumpy: Only a small subset of NumPy; Died now :(
+
+> - Currently, PyTorch is free for everyone.
+> - PyTorch feature: Tensor computation (like NumPy) with strong GPU acceleration.
+
+## Distributed programming
+
+- Target: balance on Consistency, Availability and Partition tolerance
+
+> - MapReduce, by Google, in 2004
+> - Hadoop (fair mode), Spark (easy mode)
+> - MPI (hard mode)
 
 ## Matrix multiplication | A = BxC
 
@@ -85,8 +134,19 @@ for k in range(n):
 
 ## Experiments
 
-- Warm-up-time limit: 1 minute
-- Cratical-time limit: 1 second
+```{python eval=FALSE}
+n = int(sys.argv[1])
+
+g = [[random.random() for _ in range(n)] for _ in range(n)]
+floyd(g, n)  # warm up
+
+g = [[random.random() for _ in range(n)] for _ in range(n)]
+tic = time.time()
+floyd(g, n)
+toc = time.time()
+
+print(toc - tic)
+```
 
 ```{r echo=FALSE}
 library(ggplot2)
@@ -108,38 +168,21 @@ lp <- function(df) {
 lp(f0)
 ```
 
-----
-
-for_python << for_go < for_java < for_c
+## for | for_python << for_go < for_java < for_c
 
 ```{r echo=FALSE}
 f1 <- f0[f0$Method %in% c("for_c", "for_go", "for_java", "for_python"),]
 lp(f1)
 ```
 
-
-----
-
-k_tf < k_torch < k_numpy < for_java < for_c (N <= 4)
+## k_cpu | k_numpy = k_tf = k_torch = for_java < for_c
 
 ```{r echo=FALSE}
 f1 <- f0[f0$Method %in% c("for_c", "for_java", "k_numpy", "k_torch", "k_tf"),]
 lp(f1)
 ```
 
-----
-
-k_numpy = k_tf = k_torch = for_java < for_c
-
-```{r echo=FALSE}
-f1 <- f0[f0$Method %in% c("for_c", "for_java", "k_numpy", "k_torch", "k_tf"),]
-f2 <- f1[f1$N >= 128,]
-lp(f2)
-```
-
-----
-
-for_java < for_c < k_tf_gpu = k_torch_gpu
+## k_gpu | for_java < for_c < k_tf_gpu = k_torch_gpu
 
 ```{r echo=FALSE}
 f1 <- f0[f0$Method %in% c("for_c", "for_java", "k_torch_gpu", "k_tf_gpu"),]
@@ -152,62 +195,79 @@ lp(f1)
 lp(m0)
 ```
 
-----
-
-for_python << for_go < for_java <= for_c
+## for | for_python << for_go < for_java <= for_c
 
 ```{r echo=FALSE}
 m1 <- m0[m0$Method %in% c("for_c", "for_go", "for_java", "for_python"),]
 lp(m1)
 ```
 
-----
-
-ij_*_gpu < ij_tf < ij_numpy = ij_torch < for_+
+## ij | ij_*_gpu < ij_cpu < for\_+
 
 ```{r echo=FALSE}
 m1 <- m0[m0$Method %in% c("for_c", "for_java", "ij_numpy", "ij_tf", "ij_torch", "ij_tf_gpu", "ij_torch_gpu"),]
 lp(m1)
 ```
 
-----
+## full | full_cpu < for_+ < full_tf_gpu < full_torch_gpu
 
-full_cpu < for_+ < full_tf_gpu < full_torch_gpu
-
-```{r echo=FALSE, fig.height=5.5}
+```{r echo=FALSE}
 m1 <- m0[m0$Method %in% c("for_c", "for_java", "full_numpy", "full_tf", "full_torch", "full_tf_gpu", "full_torch_gpu"),]
 lp(m1)
 ```
 
-----
+## mat | for_+ < full_\*\_gpu < mat_\*
 
-for_+ < full_\*gpu < mat_\*
-
-```{r echo=FALSE, fig.height=5.5}
+```{r echo=FALSE}
 m1 <- m0[m0$Method %in% c("for_c", "for_java", "full_tf_gpu", "full_torch_gpu", "mat_numpy", "mat_tf", "mat_torch", "mat_tf_gpu", "mat_torch_gpu"),]
 lp(m1)
 ```
 
-----
+## mat only | tf < numpy < torch < tf_gpu < torch_gpu (mat_)
 
-tf_gpu < tf < torch_gpu < torch < numpy (N < 128)
-
-```{r echo=FALSE, fig.height=5.5}
+```{r echo=FALSE}
 m1 <- m0[m0$Method %in% c("mat_numpy", "mat_tf", "mat_torch", "mat_tf_gpu", "mat_torch_gpu"),]
 lp(m1)
 ```
 
-----
+## Issue #1408 · tensorflow/tensorflow | Generalized matrix multiplication with semiring?
 
-tf < numpy < torch < tf_gpu < torch_gpu
+> Closing since I think this is out of reach of easy contributions. A trivial implementation is trivial, but users are likely to want fast versions that are hard to write. -- Geoffrey Irving at @openai
 
-```{r echo=FALSE, fig.height=5.5}
-m1 <- m0[m0$Method %in% c("mat_numpy", "mat_tf", "mat_torch", "mat_tf_gpu", "mat_torch_gpu"),]
-m2 <- m1[m1$N >= 128,]
-lp(m2)
-```
+https://github.com/tensorflow/tensorflow/issues/1408
+
+## Summary | Floyd-Warshall algorithm
+
+- for | for_python << for_go < for_java < for_c
+- k_cpu | k_numpy = k_tf = k_torch = for_java < for_c
+- k_gpu | for_java < for_c < k_tf_gpu = k_torch_gpu
+
+> - I.e.
+> - for_python << for_go < k_numpy = k_tf = k_torch = for_java < for_c < k_tf_gpu = k_torch_gpu
+
+> - I.e.
+> - for_python << for_go < k_cpu = for_java < for_c < k_gpu
+
+## Summary | Matrix multiplication
+
+- for | for_python << for_go < for_java <= for_c
+- ij | ij_*_gpu < ij_cpu < for\_+
+- full | full_cpu < for_+ < full_tf_gpu < full_torch_gpu
+- mat | for_+ < full_\*\_gpu < mat_\*
+
+> - I.e.
+> - ij_gpu < ij_cpu < full_cpu < for_java <= for_c < full_tf_gpu < full_torch_gpu < mat_cpu < mat_gpu
+
+> - I.e.
+> - ij < full_cpu < for_java/c < full_gpu < mat_\*
 
 ## Conclusion
 
-> - The code is avaiable
-  - at https://github.com/meijun/vectorized-computing
+- for_python << for_go < k_cpu = for_java < for_c < k_gpu
+- ij < full_cpu < for_java/c < full_gpu < mat_\*
+
+> - ij hurts
+> - Fully-vectorized gpu code, or java/c
+
+> - The code is available
+> - at https://github.com/meijun/vectorized-computing

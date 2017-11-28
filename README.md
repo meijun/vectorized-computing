@@ -1,13 +1,13 @@
 # Vectorized Computing
 
-A talk about vectorized computing.
+A talk about vectorized computing. See [Slides](https://meijun.github.io/vectorized-computing).
 
 ## Experiments
 
-- Warm-up time: 1 minute
-- Critical time: 1 second
-
 ### Floyd-Warshall algorithm
+
+- [summary.csv](src/floyd/summary.csv)
+- [summary.md](src/floyd/summary.md)
 
 |  Method  | N = 1 | N = 2 | N = 4 | N = 8 | N = 16 | N = 32 | N = 64 | N = 128 | N = 256 | N = 512 | N = 1024 | N = 2048 |
 | :------: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -22,6 +22,9 @@ A talk about vectorized computing.
 | for_python | 0.000002861 | 0.000006199 | 0.000025034 | 0.000159979 | 0.001207113 | 0.009351969 | 0.075846910 | 0.586315155 | 4.611817837 | N/A | N/A | N/A |
 
 ### Matrix multiplication
+
+- [summary.csv](src/matmul/summary.csv)
+- [summary.md](src/matmul/summary.md)
 
 |  Method  | N = 1 | N = 2 | N = 4 | N = 8 | N = 16 | N = 32 | N = 64 | N = 128 | N = 256 | N = 512 | N = 1024 | N = 2048 | N = 4096 | N = 8192 | N = 16384 |
 | :------: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
